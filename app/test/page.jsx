@@ -1,18 +1,25 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
+let SpeechRecognition;
+let recognition;
 
-recognition.continuous = true;
-recognition.interimResults = true;
-recognition.lang = 'he-IL';
+if (typeof window !== "undefined") {
+  SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'he-IL';
+}
 
 const SpeechListener = () => {
   const [isListening, setIsListening] = useState(false);
   const [detectedWord, setDetectedWord] = useState('');
 
   useEffect(() => {
+    if (!recognition) return;
+
     let active = false; // Local variable to track the active state
 
     const startRecognition = () => {
@@ -57,10 +64,12 @@ const SpeechListener = () => {
     startRecognition();
 
     return () => {
-      recognition.stop();
+      if (recognition) {
+        recognition.stop();
+      }
       active = false; // Ensure the local variable is reset
     };
-  }, [isListening]); // Note: The dependency on isListening might not be necessary anymore
+  }, []); // Removed isListening from dependency array as it's managed locally
 
   return (
     <div>
