@@ -62,16 +62,20 @@ const CameraSwitcher: React.FC = () => {
       if (context) {
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
-        // Move to the center of the canvas
-        context.translate(canvas.width / 2, canvas.height / 2);
-        // Flip the canvas horizontally
-        context.scale(-1, 1);
-        // Move the image back to its original position
-        context.translate(-canvas.width / 2, -canvas.height / 2);
+        if (flipVideo) {
+          // Move to the center of the canvas
+          context.translate(canvas.width / 2, canvas.height / 2);
+          // Flip the canvas horizontally
+          context.scale(-1, 1);
+          // Move the image back to its original position
+          context.translate(-canvas.width / 2, -canvas.height / 2);
+        }
         // Draw the video frame to the canvas
         context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        // Reset the transformation matrix to the default state
-        context.setTransform(1, 0, 0, 1, 0, 0);
+        if (flipVideo) {
+          // Reset the transformation matrix to the default state if flipVideo is true
+          context.setTransform(1, 0, 0, 1, 0, 0);
+        }
         
         const imageDataUrl = canvas.toDataURL('image/png');
         setScreenshots([...screenshots, imageDataUrl]);
