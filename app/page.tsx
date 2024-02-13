@@ -1,6 +1,13 @@
 "use client"
 import { Button } from '@/components/ui/button';
 import React, { useEffect, useState, useRef } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Camera = {
   deviceId: string;
@@ -26,7 +33,7 @@ const CameraSwitcher: React.FC = () => {
     }
 
     getCameras();
-  }, [currentCameraId]);
+  }, []);
 
   useEffect(() => {
     async function switchCamera() {
@@ -54,7 +61,17 @@ const CameraSwitcher: React.FC = () => {
       if (context) {
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
+        // Move to the center of the canvas
+        context.translate(canvas.width / 2, canvas.height / 2);
+        // Flip the canvas horizontally
+        context.scale(-1, 1);
+        // Move the image back to its original position
+        context.translate(-canvas.width / 2, -canvas.height / 2);
+        // Draw the video frame to the canvas
         context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        // Reset the transformation matrix to the default state
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        
         const imageDataUrl = canvas.toDataURL('image/png');
         setScreenshots([...screenshots, imageDataUrl]);
       }
@@ -62,20 +79,29 @@ const CameraSwitcher: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-4">
-      <video className="transform scale-x-[-1] rounded-lg" ref={videoRef} autoPlay playsInline muted />
+    <div className="flex flex-col items-center justify-center space-y-4 p-4 max-w-md mx-auto">
+      <video className="transform scale-x-[-1] rounded-lg w-full" ref={videoRef} autoPlay playsInline muted />
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-      <div className="flex space-x-2">
-        {cameras.map(camera => (
-          <Button key={camera.deviceId} onClick={() => handleChangeCamera(camera.deviceId)} >
-            {camera.label}
-          </Button>
-        ))}
-        <Button onClick={handleTakeScreenshot}>Take Screenshot</Button>
+      <div className='flex flex-row gap-2'>
+      <Button onClick={handleTakeScreenshot} variant='destructive' className="w-full">Take Screenshot</Button>
+
+      <Select value={currentCameraId} onValueChange={handleChangeCamera}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select Camera" />
+        </SelectTrigger>
+        <SelectContent className="w-full">
+          {cameras.map(camera => (
+            <SelectItem key={camera.deviceId} value={camera.deviceId}>
+              {camera.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       </div>
-      <div className="space-y-2">
+    
+      <div className="space-y-2 w-full">
         {screenshots.slice().reverse().map((screenshot, index) => (
-          <img key={index} src={screenshot} alt={`Screenshot ${screenshots.length - index}`} className="rounded-lg transform scale-x-[-1]" />
+          <img key={index} src={screenshot} alt={`Screenshot ${screenshots.length - index}`} className="rounded-lg w-full" />
         ))}
       </div>
     </div>
