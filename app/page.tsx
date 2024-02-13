@@ -18,6 +18,7 @@ const CameraSwitcher: React.FC = () => {
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [currentCameraId, setCurrentCameraId] = useState<string | undefined>();
   const [screenshots, setScreenshots] = useState<string[]>([]);
+  const [flipVideo, setFlipVideo] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -80,11 +81,15 @@ const CameraSwitcher: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-4 max-w-md mx-auto">
-      <video className="transform scale-x-[-1] rounded-lg w-full" ref={videoRef} autoPlay playsInline muted />
+      {flipVideo ? (
+        <video className="transform scale-x-[-1] rounded-lg w-full" ref={videoRef} autoPlay playsInline muted />
+      ) : (
+        <video className="rounded-lg w-full" ref={videoRef} autoPlay playsInline muted />
+      )}
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
       <div className='flex flex-row gap-2'>
       <Button onClick={handleTakeScreenshot} variant='destructive' className="w-full">Take Screenshot</Button>
-
+      <Button onClick={()=>{setFlipVideo(!flipVideo)}} variant='outline' className="w-full flex justify-center items-center"><img src="icons/flip.png" alt="" className="h-6 w-6" /></Button>
       <Select value={currentCameraId} onValueChange={handleChangeCamera}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select Camera" />
